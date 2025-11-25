@@ -27,7 +27,7 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'India Map', path: '/map' },
     { name: 'Emissions', path: '/emissions' },
-    { name: 'Carbon Calculator', path: '/climatiq' },
+
     { name: 'Live Data', path: '/ambee' },
     { name: 'Sinks', path: '/sinks' },
     { name: 'Neutralisation', path: '/neutralisation' },

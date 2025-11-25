@@ -2,7 +2,6 @@ import express from 'express';
 import {
   getMineData,
   getMineStatistics,
-  proxyClimatiqRequest,
   proxyAmbeeRequest,
 } from '../controller/dataController.js';
 
@@ -16,9 +15,6 @@ router.get('/test', (req, res) => {
 // Mine data routes
 router.get('/mines', getMineData);
 router.get('/statistics', getMineStatistics);
-
-// Climatiq API proxy
-router.post('/climatiq/estimate', proxyClimatiqRequest);
 
 // Ambee API proxy
 router.get('/ambee/latest', proxyAmbeeRequest);

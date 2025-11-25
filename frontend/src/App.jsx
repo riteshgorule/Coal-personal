@@ -8,7 +8,7 @@ import Neutralisation from './pages/Neutralisation';
 import Reports from './pages/Reports';
 import Login from './pages/Login';
 import MapPage from './pages/MapPage';
-import ClimatiqPage from './pages/ClimatiqPage';
+
 import AmbeePage from './pages/AmbeePage';
 
 function App() {
@@ -29,7 +29,7 @@ function App() {
                 <Route path="/neutralisation" element={<Neutralisation />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/map" element={<MapPage />} />
-                <Route path="/climatiq" element={<ClimatiqPage />} />
+
                 <Route path="/ambee" element={<AmbeePage />} />
               </Routes>
             </>

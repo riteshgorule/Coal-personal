@@ -164,46 +164,6 @@ const getMineStatistics = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Proxy request to Climatiq API
-// @route   POST /api/data/climatiq/estimate
-// @access  Public
-const proxyClimatiqRequest = asyncHandler(async (req, res) => {
-  try {
-    // Check if API key is configured
-    if (!process.env.CLIMATIQ_API_KEY) {
-      res.status(500);
-      throw new Error('Climatiq API key not configured');
-    }
-
-    console.log('Climatiq API Request:', JSON.stringify(req.body, null, 2));
-
-    // Make request to Climatiq API
-    const response = await axios.post(
-      'https://api.climatiq.io/data/v1/estimate',
-      req.body,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.CLIMATIQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    console.log('Climatiq API Response:', response.data);
-    res.json(response.data);
-  } catch (error) {
-    console.error('Climatiq API error:', error.response?.data || error.message);
-    
-    if (error.response) {
-      res.status(error.response.status);
-      res.json(error.response.data);
-    } else {
-      res.status(500);
-      throw new Error('Failed to connect to Climatiq API: ' + error.message);
-    }
-  }
-});
-
 // @desc    Proxy request to Ambee API (Rate limit: 100 calls per day)
 // @route   GET /api/data/ambee/latest
 // @access  Public
@@ -251,4 +211,4 @@ const proxyAmbeeRequest = asyncHandler(async (req, res) => {
   }
 });
 
-export { getMineData, getMineStatistics, proxyClimatiqRequest, proxyAmbeeRequest };
+export { getMineData, getMineStatistics, proxyAmbeeRequest };
