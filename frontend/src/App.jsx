@@ -7,10 +7,12 @@ import Sinks from './pages/Sinks';
 import Neutralisation from './pages/Neutralisation';
 import Reports from './pages/Reports';
 import Login from './pages/Login';
+import { EmissionsProvider } from './EmissionsContext.jsx';
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-950">
+         <EmissionsProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
@@ -30,6 +32,7 @@ function App() {
           }
         />
       </Routes>
+      </EmissionsProvider>
     </div>
   );
 }

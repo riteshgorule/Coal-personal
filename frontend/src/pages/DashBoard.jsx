@@ -1,47 +1,105 @@
 import { TrendingUp, TrendingDown, Activity, AlertTriangle } from 'lucide-react';
+import { useEmissions } from '../EmissionsContext.jsx';
+import DoughnutChart from '../components/DoughnutChart';
 
 export default function Dashboard() {
+  const { emissionRecords, emissionsSummary } = useEmissions();
+
+  // Calculate statistics from context data
+  const totalEmissions = emissionRecords.reduce((sum, record) => 
+    sum + (record.calculations?.totalEmissions || 0), 0
+  );
+
+  const totalCarbonCredits = emissionRecords.reduce((sum, record) => 
+    sum + (record.calculations?.carboncredits || 0), 0
+  );
+
+  const totalWorth = emissionRecords.reduce((sum, record) => 
+    sum + (record.calculations?.worth || 0), 0
+  );
+
+  const alertCount = emissionRecords.filter(record => 
+    (record.calculations?.totalEmissions || 0) > 3000
+  ).length;
+
   const stats = [
     {
       label: 'Total Emissions',
-      value: '12,450',
-      unit: 'tons CO₂',
-      change: '+12%',
+      value: totalEmissions.toFixed(0),
+      unit: 'kg CO₂',
+      change: `${emissionRecords.length} records`,
       trend: 'up',
       icon: TrendingUp,
     },
     {
-      label: 'Carbon Sinks',
-      value: '8,230',
-      unit: 'tons CO₂',
-      change: '+8%',
+      label: 'Carbon Credits',
+      value: totalCarbonCredits.toFixed(0),
+      unit: 'credits',
+      change: `$${totalWorth.toFixed(0)}`,
       trend: 'up',
       icon: Activity,
     },
     {
-      label: 'Net Emissions',
-      value: '4,220',
-      unit: 'tons CO₂',
-      change: '-15%',
+      label: 'This Month',
+      value: emissionsSummary.month.toFixed(0),
+      unit: 'kg CO₂',
+      change: `${Math.round((emissionsSummary.month / totalEmissions) * 100)}%`,
       trend: 'down',
       icon: TrendingDown,
     },
     {
-      label: 'Active Alerts',
-      value: '7',
-      unit: 'incidents',
-      change: '+2',
+      label: 'High Alerts',
+      value: alertCount.toString(),
+      unit: 'sites',
+      change: `${emissionRecords.length} total`,
       trend: 'up',
       icon: AlertTriangle,
     },
   ];
 
-  const recentActivity = [
-    { site: 'Mine Site A', emission: '2,450 tons CO₂', status: 'normal', time: '2 hours ago' },
-    { site: 'Mine Site B', emission: '3,120 tons CO₂', status: 'warning', time: '4 hours ago' },
-    { site: 'Mine Site C', emission: '1,890 tons CO₂', status: 'normal', time: '6 hours ago' },
-    { site: 'Mine Site D', emission: '2,760 tons CO₂', status: 'alert', time: '8 hours ago' },
-  ];
+  // Get recent activity from emission records (last 4)
+  const recentActivity = emissionRecords
+    .slice(-4)
+    .reverse()
+    .map(record => {
+      const emissions = record.calculations?.totalEmissions || 0;
+      const status = emissions > 3000 ? 'alert' : emissions > 2000 ? 'warning' : 'normal';
+      const timeAgo = Math.floor((Date.now() - new Date(record.timestamp).getTime()) / (1000 * 60 * 60));
+      
+      return {
+        site: record.site || 'Unknown Site',
+        emission: `${emissions.toFixed(0)} kg CO₂`,
+        status: status,
+        time: `${timeAgo} hours ago`
+      };
+    });
+
+  // Calculate emission source percentages
+  const totalExcavation = emissionRecords.reduce((sum, r) => 
+    sum + (r.calculations?.excavationEmissions || 0), 0
+  );
+  const totalTransportation = emissionRecords.reduce((sum, r) => 
+    sum + (r.calculations?.transportationEmissions || 0), 0
+  );
+  const totalEquipment = emissionRecords.reduce((sum, r) => 
+    sum + (r.calculations?.equipmentEmissions || 0), 0
+  );
+
+  const excavationPercent = totalEmissions > 0 ? (totalExcavation / totalEmissions * 100) : 0;
+  const transportationPercent = totalEmissions > 0 ? (totalTransportation / totalEmissions * 100) : 0;
+  const equipmentPercent = totalEmissions > 0 ? (totalEquipment / totalEmissions * 100) : 0;
+
+  // Calculate neutralization progress (carbon credits vs baseline)
+  const totalBaseline = emissionRecords.reduce((sum, r) => 
+    sum + (r.calculations?.baseline || 0), 0
+  );
+  const neutralizationProgress = totalBaseline > 0 
+    ? ((totalCarbonCredits / totalBaseline) * 100).toFixed(0) 
+    : 0;
+
+  // Latest record (for breakdown/doughnut)
+  const latestRecord = emissionRecords.length > 0 ? emissionRecords[emissionRecords.length - 1] : null;
+  const latestResults = latestRecord?.calculations || {};
 
   return (
     <div className="min-h-screen bg-gray-950 py-8">
@@ -77,85 +135,97 @@ export default function Dashboard() {
 
         <div className="grid lg:grid-cols-2 gap-6">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-6">Emissions Trend</h2>
-            <div className="h-64 flex items-end justify-between space-x-2">
-              {[65, 75, 60, 80, 70, 85, 75, 90, 80, 85, 75, 70].map((height, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div
-                    className="w-full bg-linear-to-t from-emerald-600 to-emerald-400 rounded-t transition-all hover:from-emerald-500 hover:to-emerald-300"
-                    style={{ height: `${height}%` }}
-                  ></div>
-                  <span className="text-xs text-gray-500 mt-2">{index + 1}</span>
+            <h2 className="text-xl font-semibold text-white mb-6">Emissions Breakdown</h2>
+            <div className="h-64 flex items-center justify-center">
+              {latestRecord ? (
+                <div className="w-full">
+                  <DoughnutChart data={{
+                    excavation: latestResults.excavationEmissions ?? 0,
+                    transportation: latestResults.transportationEmissions ?? 0,
+                    equipment: latestResults.equipmentEmissions ?? 0
+                  }} />
                 </div>
-              ))}
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-500">
+                  No data available. Add emission records to see breakdown.
+                </div>
+              )}
             </div>
-            <div className="text-center text-gray-400 text-sm mt-4">Last 12 Months</div>
+            <div className="text-center text-gray-400 text-sm mt-4">
+              {latestRecord ? `Latest: ${latestRecord.site || 'Record'}` : 'No Records'}
+            </div>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <h2 className="text-xl font-semibold text-white mb-6">Recent Activity</h2>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition-all"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-2 h-2 rounded-full ${
-                      activity.status === 'alert'
-                        ? 'bg-red-500'
-                        : activity.status === 'warning'
-                        ? 'bg-yellow-500'
-                        : 'bg-emerald-500'
-                    }`}></div>
-                    <div>
-                      <div className="text-white font-medium">{activity.site}</div>
-                      <div className="text-sm text-gray-400">{activity.emission}</div>
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition-all"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-2 h-2 rounded-full ${
+                        activity.status === 'alert'
+                          ? 'bg-red-500'
+                          : activity.status === 'warning'
+                          ? 'bg-yellow-500'
+                          : 'bg-emerald-500'
+                      }`}></div>
+                      <div>
+                        <div className="text-white font-medium">{activity.site}</div>
+                        <div className="text-sm text-gray-400">{activity.emission}</div>
+                      </div>
                     </div>
+                    <div className="text-sm text-gray-500">{activity.time}</div>
                   </div>
-                  <div className="text-sm text-gray-500">{activity.time}</div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  No recent activity. Add emission records to see updates.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mt-6">
+        {/* <div className="grid lg:grid-cols-3 gap-6 mt-6">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Emission Sources</h3>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-400">Excavation</span>
-                  <span className="text-white">45%</span>
+                  <span className="text-white">{excavationPercent.toFixed(0)}%</span>
                 </div>
                 <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '45%' }}></div>
+                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: `${excavationPercent}%` }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-400">Transportation</span>
-                  <span className="text-white">30%</span>
+                  <span className="text-white">{transportationPercent.toFixed(0)}%</span>
                 </div>
                 <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '30%' }}></div>
+                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: `${transportationPercent}%` }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Processing</span>
-                  <span className="text-white">25%</span>
+                  <span className="text-gray-400">Equipment</span>
+                  <span className="text-white">{equipmentPercent.toFixed(0)}%</span>
                 </div>
                 <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '25%' }}></div>
+                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: `${equipmentPercent}%` }}></div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Neutralisation Progress</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Carbon Credits Progress</h3>
             <div className="flex items-center justify-center h-40">
               <div className="relative w-32 h-32">
                 <svg className="transform -rotate-90 w-32 h-32">
@@ -176,34 +246,112 @@ export default function Dashboard() {
                     strokeWidth="8"
                     fill="transparent"
                     strokeDasharray={`${2 * Math.PI * 56}`}
-                    strokeDashoffset={`${2 * Math.PI * 56 * (1 - 0.66)}`}
+                    strokeDashoffset={`${2 * Math.PI * 56 * (1 - neutralizationProgress / 100)}`}
                     className="text-emerald-600"
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-3xl font-bold text-white">66%</span>
+                  <span className="text-3xl font-bold text-white">{neutralizationProgress}%</span>
                 </div>
               </div>
             </div>
-            <p className="text-center text-gray-400 text-sm mt-4">Of target achieved</p>
+            <p className="text-center text-gray-400 text-sm mt-4">Credits vs Baseline</p>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Summary Statistics</h3>
             <div className="space-y-3">
-              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg transition-all text-sm font-medium">
-                Generate Report
-              </button>
-              <button className="w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-all text-sm font-medium">
-                Add New Site
-              </button>
-              <button className="w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-all text-sm font-medium">
-                View Alerts
-              </button>
+              <div className="bg-gray-800 p-3 rounded-lg">
+                <div className="text-xs text-gray-400 mb-1">Total Sites</div>
+                <div className="text-xl font-bold text-white">{emissionRecords.length}</div>
+              </div>
+              <div className="bg-gray-800 p-3 rounded-lg">
+                <div className="text-xs text-gray-400 mb-1">Today's Emissions</div>
+                <div className="text-xl font-bold text-white">{emissionsSummary.today.toFixed(0)} kg</div>
+              </div>
+              <div className="bg-gray-800 p-3 rounded-lg">
+                <div className="text-xs text-gray-400 mb-1">Total Worth</div>
+                <div className="text-xl font-bold text-emerald-500">${totalWorth.toFixed(0)}</div>
+              </div>
             </div>
           </div>
-        </div>
+        </div> */}
+
+        {/* Detailed Results Section */}
+        {emissionRecords.length > 0 && (
+          <div className="mt-8 bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-2xl font-bold mb-6 text-white">Latest Emission Record Details</h2>
+            {(() => {
+              const latestRecord = emissionRecords[emissionRecords.length - 1];
+              const results = latestRecord.calculations;
+              
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Excavation Results */}
+                  <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-white mb-2">Excavation</h4>
+                    <p className="text-sm text-gray-300">Total: <span className="font-bold text-white">{(results.excavationEmissions ?? 0).toFixed(2)} kg CO₂</span></p>
+                    <p className="text-sm text-gray-300">Per Capita: <span className="font-bold text-white">{(results.excavationPerCapita ?? 0).toFixed(2)} kg</span></p>
+                    <p className="text-sm text-gray-300">Per Output: <span className="font-bold text-white">{(results.excavationPerOutput ?? 0).toFixed(2)} kg</span></p>
+                  </div>
+
+                  {/* Transportation Results */}
+                  <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-white mb-2">Transportation</h4>
+                    <p className="text-sm text-gray-300">Total: <span className="font-bold text-white">{(results.transportationEmissions ?? 0).toFixed(2)} kg CO₂</span></p>
+                    <p className="text-sm text-gray-300">Per Capita: <span className="font-bold text-white">{(results.transportationPerCapita ?? 0).toFixed(2)} kg</span></p>
+                    <p className="text-sm text-gray-300">Per Output: <span className="font-bold text-white">{(results.transportationPerOutput ?? 0).toFixed(2)} kg</span></p>
+                  </div>
+
+                  {/* Equipment Results */}
+                  <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-white mb-2">Equipment</h4>
+                    <p className="text-sm text-gray-300">Total: <span className="font-bold text-white">{(results.equipmentEmissions ?? 0).toFixed(2)} kg CO₂</span></p>
+                    <p className="text-sm text-gray-300">Per Capita: <span className="font-bold text-white">{(results.equipmentPerCapita ?? 0).toFixed(2)} kg</span></p>
+                    <p className="text-sm text-gray-300">Per Output: <span className="font-bold text-white">{(results.equipmentPerOutput ?? 0).toFixed(2)} kg</span></p>
+                  </div>
+
+                  {/* Total Results */}
+                  <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-white mb-2">Total</h4>
+                    <p className="text-sm text-gray-300">Total: <span className="font-bold text-white">{(results.totalEmissions ?? 0).toFixed(2)} kg CO₂</span></p>
+                    <p className="text-sm text-gray-300">Per Capita: <span className="font-bold text-white">{(results.perCapitaEmissions ?? 0).toFixed(2)} kg</span></p>
+                    <p className="text-sm text-gray-300">Per Output: <span className="font-bold text-white">{(results.perOutputEmissions ?? 0).toFixed(2)} kg</span></p>
+                  </div>
+
+                  
+
+                  {/* Collected Info */}
+                  <div className="md:col-span-2 bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-white mb-2">Collected Info</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                      <p>Excavation: <span className="font-bold text-white">{latestRecord.excavation}</span></p>
+                      <p>Transportation: <span className="font-bold text-white">{latestRecord.transportation}</span></p>
+                      <p>Fuel: <span className="font-bold text-white">{latestRecord.fuel}</span></p>
+                      <p>Equipment: <span className="font-bold text-white">{latestRecord.equipment}</span></p>
+                      <p>Workers: <span className="font-bold text-white">{latestRecord.workers}</span></p>
+                      <p>Fuel Type: <span className="font-bold text-white">{latestRecord.fuelType}</span></p>
+                      <p>After Mitigation: <span className="font-bold text-white">{latestRecord.reduction}</span></p>
+                      <p>Coal Production: <span className="font-bold text-white">{latestRecord.output}</span></p>
+                    </div>
+                  </div>
+
+                  {/* Carbon Credits */}
+                  <div className="md:col-span-2 bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-white mb-2">Carbon Credits</h4>
+                    <div className="space-y-1 text-sm text-gray-300">
+                      <p>Baseline Emissions: <span className="font-bold text-white">{(results.baseline ?? 0).toFixed(2)} kg CO₂</span></p>
+                      <p>After Mitigation: <span className="font-bold text-white">{(results.reduced ?? 0).toFixed(2)} kg CO₂</span></p>
+                      <p>Total Carbon Credits: <span className="font-bold text-white">{(results.carboncredits ?? 0).toFixed(2)}</span></p>
+                      <p>Net Worth: <span className="font-bold text-white">${(results.worth ?? 0).toFixed(2)}</span></p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
       </div>
     </div>
   );
