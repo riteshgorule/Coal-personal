@@ -1,206 +1,213 @@
-import { TrendingUp, TrendingDown, Activity, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Factory, Users, Zap } from 'lucide-react';
 
 export default function Dashboard() {
-  const stats = [
-    {
-      label: 'Total Emissions',
-      value: '12,450',
-      unit: 'tons CO₂',
-      change: '+12%',
-      trend: 'up',
-      icon: TrendingUp,
-    },
-    {
-      label: 'Carbon Sinks',
-      value: '8,230',
-      unit: 'tons CO₂',
-      change: '+8%',
-      trend: 'up',
-      icon: Activity,
-    },
-    {
-      label: 'Net Emissions',
-      value: '4,220',
-      unit: 'tons CO₂',
-      change: '-15%',
-      trend: 'down',
-      icon: TrendingDown,
-    },
-    {
-      label: 'Active Alerts',
-      value: '7',
-      unit: 'incidents',
-      change: '+2',
-      trend: 'up',
-      icon: AlertTriangle,
-    },
-  ];
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const recentActivity = [
-    { site: 'Mine Site A', emission: '2,450 tons CO₂', status: 'normal', time: '2 hours ago' },
-    { site: 'Mine Site B', emission: '3,120 tons CO₂', status: 'warning', time: '4 hours ago' },
-    { site: 'Mine Site C', emission: '1,890 tons CO₂', status: 'normal', time: '6 hours ago' },
-    { site: 'Mine Site D', emission: '2,760 tons CO₂', status: 'alert', time: '8 hours ago' },
-  ];
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        console.log('Dashboard: Fetching statistics...');
+        const response = await fetch('http://localhost:5000/api/data/statistics');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch statistics: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Dashboard: Statistics received:', data);
+        setStats(data);
+      } catch (err) {
+        console.error('Dashboard: Error fetching statistics:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-xl text-gray-300">Loading coal mine statistics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <p className="text-xl text-red-400 mb-4">Error loading statistics</p>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-gray-400">Monitor your carbon emissions in real-time</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Coal Mine Analytics Dashboard</h1>
+          <p className="text-gray-400">Monitor India's coal mining sector performance and environmental impact</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-2 rounded-lg ${
-                  stat.trend === 'down' ? 'bg-emerald-600/10' : 'bg-orange-600/10'
-                }`}>
-                  <stat.icon className={`w-5 h-5 ${
-                    stat.trend === 'down' ? 'text-emerald-500' : 'text-orange-500'
-                  }`} />
-                </div>
-                <span className={`text-sm font-medium ${
-                  stat.trend === 'down' ? 'text-emerald-500' : 'text-orange-500'
-                }`}>
-                  {stat.change}
-                </span>
-              </div>
-              <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-              <div className="text-gray-500 text-sm mb-1">{stat.unit}</div>
-              <div className="text-gray-400 text-sm">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6">
+        {/* Key Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-6">Emissions Trend</h2>
-            <div className="h-64 flex items-end justify-between space-x-2">
-              {[65, 75, 60, 80, 70, 85, 75, 90, 80, 85, 75, 70].map((height, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div
-                    className="w-full bg-linear-to-t from-emerald-600 to-emerald-400 rounded-t transition-all hover:from-emerald-500 hover:to-emerald-300"
-                    style={{ height: `${height}%` }}
-                  ></div>
-                  <span className="text-xs text-gray-500 mt-2">{index + 1}</span>
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 rounded-lg bg-blue-600/10">
+                <Factory className="w-6 h-6 text-blue-500" />
+              </div>
             </div>
-            <div className="text-center text-gray-400 text-sm mt-4">Last 12 Months</div>
+            <div className="mb-2">
+              <span className="text-3xl font-bold text-white">{stats?.totalMines || 0}</span>
+              <span className="text-gray-400 ml-2">mines</span>
+            </div>
+            <p className="text-gray-400 text-sm font-medium mb-1">Total Coal Mines</p>
+            <p className="text-green-400 text-sm">{stats?.operatingMines || 0} currently operating</p>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-6">Recent Activity</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 rounded-lg bg-yellow-600/10">
+                <Zap className="w-6 h-6 text-yellow-500" />
+              </div>
+            </div>
+            <div className="mb-2">
+              <span className="text-3xl font-bold text-white">{stats?.totalCapacity || 0}</span>
+              <span className="text-gray-400 ml-2">Mtpa</span>
+            </div>
+            <p className="text-gray-400 text-sm font-medium mb-1">Total Capacity</p>
+            <p className="text-blue-400 text-sm">{stats?.totalProduction || 0} Mtpa production</p>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 rounded-lg bg-red-600/10">
+                <TrendingUp className="w-6 h-6 text-red-500" />
+              </div>
+            </div>
+            <div className="mb-2">
+              <span className="text-3xl font-bold text-white">{stats?.totalEmissions || 0}</span>
+              <span className="text-gray-400 ml-2">M tonnes/yr</span>
+            </div>
+            <p className="text-gray-400 text-sm font-medium mb-1">Methane Emissions</p>
+            <p className="text-red-400 text-sm">Environmental impact monitoring</p>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 rounded-lg bg-green-600/10">
+                <Users className="w-6 h-6 text-green-500" />
+              </div>
+            </div>
+            <div className="mb-2">
+              <span className="text-3xl font-bold text-white">{stats?.totalWorkforce?.toLocaleString() || 0}</span>
+              <span className="text-gray-400 ml-2">people</span>
+            </div>
+            <p className="text-gray-400 text-sm font-medium mb-1">Total Workforce</p>
+            <p className="text-green-400 text-sm">Employment in coal sector</p>
+          </div>
+        </div>
+
+        {/* Analytics Section */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          {/* Top States */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-white mb-6">Top States by Mine Count</h2>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition-all"
-                >
+              {stats?.stateDistribution && Object.entries(stats.stateDistribution).slice(0, 5).map(([state, count], index) => (
+                <div key={state} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-2 h-2 rounded-full ${
-                      activity.status === 'alert'
-                        ? 'bg-red-500'
-                        : activity.status === 'warning'
-                        ? 'bg-yellow-500'
-                        : 'bg-emerald-500'
-                    }`}></div>
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
                     <div>
-                      <div className="text-white font-medium">{activity.site}</div>
-                      <div className="text-sm text-gray-400">{activity.emission}</div>
+                      <div className="text-white font-medium">{state}</div>
+                      <div className="text-sm text-gray-400">{count} mines</div>
                     </div>
                   </div>
-                  <div className="text-sm text-gray-500">{activity.time}</div>
+                  <div className="w-24 bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${Math.min((count / Math.max(...Object.values(stats.stateDistribution))) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Coal Types */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-white mb-6">Coal Type Distribution</h2>
+            <div className="space-y-4">
+              {stats?.coalTypeDistribution && Object.entries(stats.coalTypeDistribution).map(([type, count], index) => (
+                <div key={type} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-4 h-4 rounded-full ${
+                      index === 0 ? 'bg-emerald-500' :
+                      index === 1 ? 'bg-blue-500' :
+                      index === 2 ? 'bg-yellow-500' :
+                      'bg-gray-500'
+                    }`}></div>
+                    <div>
+                      <div className="text-white font-medium">{type}</div>
+                      <div className="text-sm text-gray-400">{count} mines</div>
+                    </div>
+                  </div>
+                  <div className="text-white font-bold">
+                    {Math.round((count / (stats?.totalMines || 1)) * 100)}%
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mt-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Emission Sources</h3>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Excavation</span>
-                  <span className="text-white">45%</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '45%' }}></div>
-                </div>
+        {/* Key Insights */}
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-white mb-6">Key Insights</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-500 mb-2">
+                {stats?.operatingMines && stats?.totalMines ? 
+                  Math.round((stats.operatingMines / stats.totalMines) * 100) : 0}%
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Transportation</span>
-                  <span className="text-white">30%</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '30%' }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Processing</span>
-                  <span className="text-white">25%</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '25%' }}></div>
-                </div>
-              </div>
+              <p className="text-gray-400">Mines Currently Operating</p>
+              <p className="text-sm text-gray-500 mt-1">Active production facilities</p>
             </div>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Neutralisation Progress</h3>
-            <div className="flex items-center justify-center h-40">
-              <div className="relative w-32 h-32">
-                <svg className="transform -rotate-90 w-32 h-32">
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r="56"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    fill="transparent"
-                    className="text-gray-800"
-                  />
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r="56"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    fill="transparent"
-                    strokeDasharray={`${2 * Math.PI * 56}`}
-                    strokeDashoffset={`${2 * Math.PI * 56 * (1 - 0.66)}`}
-                    className="text-emerald-600"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-3xl font-bold text-white">66%</span>
-                </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-500 mb-2">
+                {stats?.totalCapacity && stats?.totalProduction ? 
+                  Math.round((stats.totalProduction / stats.totalCapacity) * 100) : 0}%
               </div>
+              <p className="text-gray-400">Capacity Utilization</p>
+              <p className="text-sm text-gray-500 mt-1">Production efficiency</p>
             </div>
-            <p className="text-center text-gray-400 text-sm mt-4">Of target achieved</p>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg transition-all text-sm font-medium">
-                Generate Report
-              </button>
-              <button className="w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-all text-sm font-medium">
-                Add New Site
-              </button>
-              <button className="w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-all text-sm font-medium">
-                View Alerts
-              </button>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-yellow-500 mb-2">
+                {stats?.proposedMines || 0}
+              </div>
+              <p className="text-gray-400">Proposed Mines</p>
+              <p className="text-sm text-gray-500 mt-1">Future capacity expansion</p>
             </div>
           </div>
         </div>
