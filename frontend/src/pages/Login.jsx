@@ -45,7 +45,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-emerald-950">
+    <div className="min-h-screen  flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-emerald-950">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{

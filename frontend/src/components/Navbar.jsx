@@ -62,13 +62,13 @@ export default function Navbar() {
             
             {isLoggedIn ? (
               <div className="flex items-center space-x-2 ml-4">
-                <div className="flex items-center space-x-2 px-3 py-2 text-gray-300">
+                <div className="flex items-center space-x-2 px-3 py-2 text-black">
                   <User className="w-4 h-4" />
                   <span className="text-sm">{user?.name}</span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-200 hover:bg-emerald-700 transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-200 bg-emerald-700"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>

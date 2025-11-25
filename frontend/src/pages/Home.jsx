@@ -48,7 +48,7 @@ export default function Home({ onNavigate }) {
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-emerald-900/20 to-gray-900/20 border-t border-b border-gray-800 py-16">
+      <div className="bg-gradienzt-to-r from-emerald-900/20 to-gray-900/20 border-t border-b border-gray-800 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>

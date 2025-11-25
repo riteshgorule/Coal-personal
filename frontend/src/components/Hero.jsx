@@ -26,7 +26,7 @@ export default function HeroSection() {
             A comprehensive platform to measure, track, and analyze carbon emissions across coal mining sites, helping you meet environmental standards and sustainability goals.
           </p>
 
-          <div className="mx-auto w-full flex items-center justify-center gap-3 mt-8">
+          <div className="mx-auto w-full flex items-center justify-center gap-3 mt-2">
             <button className="bg-black hover:bg-slate-600 text-cyan-50 px-6 py-3 rounded-lg font-normal transition text-base md:text-lg">
               Start Monitoring
             </button>

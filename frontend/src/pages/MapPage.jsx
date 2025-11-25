@@ -57,7 +57,7 @@ function MapPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen  flex items-center justify-center bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
           <p className="text-white">Loading mines data...</p>
@@ -78,7 +78,7 @@ function MapPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4">
+    <div className="min-h-screen pt-24 bg-gray-900 p-4">
       <div className="max-w-7xl mx-auto">
         <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
           {/* Header */}

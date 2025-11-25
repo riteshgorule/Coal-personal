@@ -113,7 +113,7 @@ function AmbeePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4">
+    <div className="min-h-screen pt-24 bg-gray-900 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
