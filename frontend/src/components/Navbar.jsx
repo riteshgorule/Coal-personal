@@ -25,7 +25,10 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Dashboard', path: '/dashboard' },
+    { name: 'India Map', path: '/map' },
     { name: 'Emissions', path: '/emissions' },
+
+    { name: 'Live Data', path: '/ambee' },
     { name: 'Sinks', path: '/sinks' },
     { name: 'Neutralisation', path: '/neutralisation' },
     { name: 'Reports', path: '/reports' },

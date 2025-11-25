@@ -7,6 +7,9 @@ import Sinks from './pages/Sinks';
 import Neutralisation from './pages/Neutralisation';
 import Reports from './pages/Reports';
 import Login from './pages/Login';
+import MapPage from './pages/MapPage';
+
+import AmbeePage from './pages/AmbeePage';
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
                 <Route path="/sinks" element={<Sinks />} />
                 <Route path="/neutralisation" element={<Neutralisation />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/map" element={<MapPage />} />
+
+                <Route path="/ambee" element={<AmbeePage />} />
               </Routes>
             </>
           }
