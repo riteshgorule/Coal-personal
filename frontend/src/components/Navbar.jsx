@@ -25,14 +25,17 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Dashboard', path: '/dashboard' },
+    { name: 'India Map', path: '/map' },
     { name: 'Emissions', path: '/emissions' },
+
+    { name: 'Live Data', path: '/ambee' },
     { name: 'Sinks', path: '/sinks' },
     { name: 'Neutralisation', path: '/neutralisation' },
     { name: 'Reports', path: '/reports' },
   ];
 
   return (
-    <nav className="bg-gray-900 border-b border-gray-800">
+    <nav className="fixed top-0 left-0 right-0 z-40 bg-white/6 backdrop-blur-md border-b border-white/10 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-3">
@@ -50,7 +53,7 @@ export default function Navbar() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   location.pathname === item.path
                     ? 'bg-emerald-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    : 'text-white hover:bg-gray-800 hover:text-white'
                 }`}
               >
                 {item.name}
@@ -65,7 +68,7 @@ export default function Navbar() {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-all"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-200 hover:bg-emerald-700 transition-all"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
@@ -83,16 +86,15 @@ export default function Navbar() {
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-300 hover:text-white p-2"
+            className="md:hidden text-gray-100 p-2 bg-white/6 backdrop-blur rounded-lg"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
-
       {mobileMenuOpen && (
-        <div className="md:hidden bg-gray-800 border-t border-gray-700">
-          <div className="px-2 pt-2 pb-3 space-y-1">
+        <div className="md:hidden bg-white/6 backdrop-blur border-t border-white/10 rounded-b-xl mt-2 px-4 py-3 max-w-7xl mx-auto">
+          <div className="space-y-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -101,7 +103,7 @@ export default function Navbar() {
                 className={`block w-full text-left px-3 py-2 rounded-lg text-base font-medium transition-all ${
                   location.pathname === item.path
                     ? 'bg-emerald-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    : 'text-gray-100 hover:bg-emerald-700/20'
                 }`}
               >
                 {item.name}
@@ -109,7 +111,7 @@ export default function Navbar() {
             ))}
             {isLoggedIn ? (
               <>
-                <div className="px-3 py-2 text-gray-300 text-sm">
+                <div className="px-3 py-2 text-gray-100 text-sm">
                   <User className="w-4 h-4 inline mr-2" />
                   {user?.name}
                 </div>
@@ -118,7 +120,7 @@ export default function Navbar() {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="block w-full text-left px-3 py-2 rounded-lg text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-all"
+                  className="block w-full text-left px-3 py-2 rounded-lg text-base font-medium text-gray-100 hover:bg-emerald-700/20 transition-all"
                 >
                   <LogOut className="w-4 h-4 inline mr-2" />
                   Logout
