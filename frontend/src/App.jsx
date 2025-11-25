@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Dashboard from './pages/DashBoard';
@@ -6,33 +6,30 @@ import Emissions from './pages/Emissions';
 import Sinks from './pages/Sinks';
 import Neutralisation from './pages/Neutralisation';
 import Reports from './pages/Reports';
+import Login from './pages/Login';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <Home onNavigate={setCurrentPage} />;
-      case 'dashboard':
-        return <Dashboard />;
-      case 'emissions':
-        return <Emissions />;
-      case 'sinks':
-        return <Sinks />;
-      case 'neutralisation':
-        return <Neutralisation />;
-      case 'reports':
-        return <Reports />;
-      default:
-        return <Home onNavigate={setCurrentPage} />;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-950">
-      <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
-      {renderPage()}
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/*"
+          element={
+            <>
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/emissions" element={<Emissions />} />
+                <Route path="/sinks" element={<Sinks />} />
+                <Route path="/neutralisation" element={<Neutralisation />} />
+                <Route path="/reports" element={<Reports />} />
+              </Routes>
+            </>
+          }
+        />
+      </Routes>
     </div>
   );
 }
