@@ -10,7 +10,7 @@ import Login from './pages/Login';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen">
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
