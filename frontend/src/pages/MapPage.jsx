@@ -23,7 +23,7 @@ function MapPage() {
   useEffect(() => {
     const fetchMines = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/data/mines');
+        const response = await fetch('https://carbontracker-axkr.onrender.com/api/data/mines');
         if (!response.ok) {
           throw new Error('Failed to fetch mines data');
         }

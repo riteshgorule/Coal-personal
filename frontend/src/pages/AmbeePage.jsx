@@ -69,7 +69,7 @@ function AmbeePage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/data/ambee/latest?lat=${lat}&lng=${lng}`, {
+      const response = await fetch(`https://carbontracker-axkr.onrender.com/api/data/ambee/latest?lat=${lat}&lng=${lng}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
