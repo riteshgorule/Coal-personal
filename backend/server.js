@@ -21,7 +21,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:5174',
-  'https://carbontracker-omega.vercel.app/'
+  'https://carbontracker-omega.vercel.app'
 ];
 
 app.use(
